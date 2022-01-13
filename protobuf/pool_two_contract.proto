@@ -46,16 +46,16 @@ service PoolTwoContract {
 
   rpc MassUpdatePools(google.protobuf.Empty) returns(google.protobuf.Empty){}
 
-  rpc UpdatePool(google.protobuf.Int64Value) returns(google.protobuf.Empty){}
+  rpc UpdatePool(google.protobuf.Int32Value) returns(google.protobuf.Empty){}
 
   rpc ReDeposit(ReDepositInput) returns(google.protobuf.Empty){}
-  
+
   rpc Deposit(DepositInput) returns(google.protobuf.Empty){}
-  
+
   rpc Withdraw(WithdrawInput) returns(google.protobuf.Empty){}
-  
+
   rpc FixEndBlock(google.protobuf.BoolValue) returns(google.protobuf.Empty){}
-  
+
   //  View
   rpc PoolLength(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option (aelf.is_view) = true;
@@ -76,56 +76,62 @@ service PoolTwoContract {
   rpc Pending(PendingInput) returns(aelf.BigIntValue){
     option (aelf.is_view) = true;
   }
-  
+
   rpc UserInfo(UserInfoInput) returns(google.protobuf.Empty){
     option (aelf.is_view) = true;
   }
-  
+
   rpc StartBlock(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option (aelf.is_view) = true;
   }
-  
+
   rpc DistributeToken(google.protobuf.Empty) returns(aelf.Address){
     option (aelf.is_view) = true;
   }
-  
+
   rpc PoolInfo(google.protobuf.Int64Value) returns(PoolInfoStruct){
     option (aelf.is_view) = true;
   }
-  
+
   rpc TotalAllocPoint(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option (aelf.is_view) = true;
   }
-  
+
   rpc HalvingPeriod(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option(aelf.is_view) = true;
   }
-  
+
   rpc FarmPoolOne(google.protobuf.Empty) returns(aelf.Address){
     option (aelf.is_view) = true;
   }
-  
+
   rpc TotalReward(google.protobuf.Empty) returns(aelf.BigIntValue){
     option (aelf.is_view) = true;
   }
-  
-  rpc IssuedReward(google.protobuf.Empty) returns()
+
+  rpc IssuedReward(google.protobuf.Empty) returns(aelf.BigIntValue){
+    option (aelf.is_view) = true;
+  }
+
+  rpc endBlock(google.protobuf.Empty) returns(google.protobuf.Int64Value){
+    option (aelf.is_view) = true;
+  }
 }
 
 //Input&Output
 message UserInfoInput{
-  string pid = 1;
+  int32 pid = 1;
   aelf.Address user = 2;
 }
 
 message WithdrawInput{
-  int64 pid = 1;
-  aelf.BigIntValue amount= 2;
-} 
-    
+  int32 pid = 1;
+  aelf.BigIntValue amount = 2;
+}
+
 message DepositInput{
-  int64 pid = 1;
-  aelf.BigIntValue amount= 2;
+  int32 pid = 1;
+  aelf.BigIntValue amount = 2;
 }
 
 message ReDepositInput{
@@ -134,12 +140,12 @@ message ReDepositInput{
 }
 
 message PendingInput{
-  int64 pid = 1;
+  int32 pid = 1;
   aelf.Address user = 2;
 }
 
 message SetInput{
-  int64 pid = 1;
+  int32 pid = 1;
   int64 alloc_point = 2;
   aelf.BigIntValue new_per_block = 3;
   bool with_update = 4;
@@ -157,6 +163,7 @@ message InitializeInput{
   int64 halving_period = 3;
   int64 start_block = 4;
   aelf.BigIntValue  total_reward = 5;
+  aelf.Address owner = 6;
 }
 
 
@@ -170,7 +177,8 @@ message PoolInfoStruct{
   string lp_token = 1;
   int64 alloc_point = 2;
   int64 last_reward_block = 3;
-  int64 acc_distribute_token_per_share = 4;
+  aelf.BigIntValue acc_distribute_token_per_share = 4;
+  aelf.BigIntValue totalAmount = 5;
 }
 
 message PoolInfo{
@@ -181,21 +189,21 @@ message PoolInfo{
 message Deposit{
   option (aelf.is_event) = true;
   aelf.Address user = 1 ;
-  int64 pid = 2;
+  int32 pid = 2;
   aelf.BigIntValue amount = 3;
 }
 
 message Withdraw{
   option (aelf.is_event) = true;
   aelf.Address user = 1;
-  int64 pid = 2;
+  int32 pid = 2;
   aelf.BigIntValue amount = 3;
 }
 
 message ClaimRevenue{
   option (aelf.is_event) = true;
   aelf.Address user = 1;
-  int64 pid = 2;
+  int32 pid = 2;
   string token_symbol = 3;
   int64 token_type = 4;
   aelf.BigIntValue amount = 5;
@@ -203,14 +211,14 @@ message ClaimRevenue{
 
 message WeightSet{
   option (aelf.is_event) = true;
-  int64 pid = 1;
+  int32 pid = 1;
   int64 new_allocation_point = 2;
 }
 
 message PoolAdded{
   option (aelf.is_event) = true;
   string token = 1;
-  int64 pid = 2;
+  int32 pid = 2;
   int64 allocation_point = 3;
   int64 last_reward_block_height = 4;
   int64 pool_type = 5;
@@ -228,7 +236,7 @@ message HalvingPeriodSet{
 
 message UpdatePool{
   option (aelf.is_event) = true;
-  int64 pid = 1;
+  int32 pid = 1;
   aelf.BigIntValue distribute_token_amount = 2;
   int64 update_block_height = 3;
 }

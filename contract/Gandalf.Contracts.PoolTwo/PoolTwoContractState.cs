@@ -1,4 +1,5 @@
 using AElf.Sdk.CSharp.State;
+using AElf.Types;
 
 namespace Gandalf.Contracts.PoolTwoContract
 {
@@ -7,6 +8,19 @@ namespace Gandalf.Contracts.PoolTwoContract
     /// </summary>
     public partial class PoolTwoContractState : ContractState
     {
-        // state definitions go here.
+        public SingletonState<Address> Owner { get; set; }
+        public Int64State StartBlock { get; set; }
+        public Int64State EndBlock { get; set; }
+        public StringState DistributeToken { get; set; }
+        public SingletonState<BigIntValue> DistributeTokenPerBlock { get; set; }
+        
+        public MappedState<long,Address,UserInfoStruct> UserInfo { get; set; }
+        public SingletonState<PoolInfo> PoolInfo { get; set; }
+        public Int64State totalAllocPoint { get; set; }
+        public Int64State HalvingPeriod { get; set; }
+        public SingletonState<Address> FarmPoolOne { get; set; }
+        public SingletonState<BigIntValue> TotalReward { get; set; }
+        public SingletonState<BigIntValue> IssuedReward { get; set; }
+        
     }
 }
