@@ -22,6 +22,10 @@ namespace Gandalf.Contracts.PoolTwo
         
         public ECKeyPair OwnerPair;
         public ECKeyPair TomPair;
+
+        public Address PoolOneMock;
+        public ECKeyPair PoolOneMockPair;
+        
         
         // constants
         private const string DISTRIBUTETOKEN = "ISTAR";
@@ -36,7 +40,9 @@ namespace Gandalf.Contracts.PoolTwo
             Owner = Address.FromPublicKey(OwnerPair.PublicKey);
             TomPair = SampleAccount.Accounts[1].KeyPair;
             Tom = Address.FromPublicKey(TomPair.PublicKey);
-                        
+            PoolOneMockPair = SampleAccount.Accounts[2].KeyPair;
+            PoolOneMock = Address.FromPublicKey(PoolOneMockPair.PublicKey);
+
             var stub = GetPoolTwoContractStub(OwnerPair);
             await stub.Initialize.SendAsync(new InitializeInput
             {
@@ -108,6 +114,14 @@ namespace Gandalf.Contracts.PoolTwo
                 Amount = 10000000000,
                 Symbol = LPTOKEN_01,
                 To = Tom
+            });
+
+
+            await tokenStub.Transfer.SendAsync(new TransferInput
+            {
+                Amount = 10000000000,
+                Symbol = LPTOKEN_01,
+                To = PoolOneMock
             });
             
             await tokenStub.Create.SendAsync(new CreateInput

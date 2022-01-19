@@ -8,7 +8,8 @@ using Google.Protobuf.WellKnownTypes;
 namespace Gandalf.Contracts.PoolTwoContract
 {
     public partial class PoolTwoContract
-    {
+    {   
+        
         /**
          * withdraw
          */

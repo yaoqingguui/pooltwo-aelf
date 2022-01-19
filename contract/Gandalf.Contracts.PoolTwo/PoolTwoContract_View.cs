@@ -8,7 +8,54 @@ using Google.Protobuf.WellKnownTypes;
 namespace Gandalf.Contracts.PoolTwoContract
 {
     public partial class PoolTwoContract
-    {
+    {   
+        
+        /**
+         * TotalReward
+         */
+        public override BigIntValue TotalReward(Empty input)
+        {
+            return State.TotalReward.Value;
+        }
+
+        /**
+         * IssuedReward
+         */
+        public override BigIntValue IssuedReward(Empty input)
+        {
+            return State.IssuedReward.Value;
+        }
+
+        /**
+         * DistributeToken
+         */
+        public override StringValue DistributeToken(Empty input)
+        {
+            return new StringValue
+            {
+                Value = State.DistributeToken.Value
+            };
+        }
+
+        /**
+         * HalvingPeriod
+         */
+        public override Int64Value HalvingPeriod(Empty input)
+        {
+            return new Int64Value
+            {
+                Value = State.HalvingPeriod.Value
+            };
+        }
+
+        /**
+         *  FarmPoolOne
+         */
+        public override Address FarmPoolOne(Empty input)
+        {
+            return State.FarmPoolOne.Value;
+        }
+
         /**
          *  PoolInfo
          */
@@ -18,7 +65,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  Pending
          */
         public override BigIntValue Pending(PendingInput input)
         {
@@ -54,7 +101,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  GetDistributeTokenBlockReward
          */
         public override BigIntValue GetDistributeTokenBlockReward(Int64Value input)
         {
@@ -98,7 +145,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  Reward
          */
         public override BigIntValue Reward(Int64Value input)
         {
@@ -107,7 +154,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  Phase
          */
         public override Int64Value Phase(Int64Value input)
         {
