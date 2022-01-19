@@ -77,7 +77,7 @@ service PoolTwoContract {
     option (aelf.is_view) = true;
   }
 
-  rpc UserInfo(UserInfoInput) returns(google.protobuf.Empty){
+  rpc UserInfo(UserInfoInput) returns(UserInfoStruct){
     option (aelf.is_view) = true;
   }
 
@@ -89,10 +89,10 @@ service PoolTwoContract {
     option (aelf.is_view) = true;
   }
 
-  rpc PoolInfo(google.protobuf.Int64Value) returns(PoolInfoStruct){
+  rpc PoolInfo(google.protobuf.Int32Value) returns(PoolInfoStruct){
     option (aelf.is_view) = true;
   }
-
+  
   rpc TotalAllocPoint(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option (aelf.is_view) = true;
   }
@@ -114,6 +114,10 @@ service PoolTwoContract {
   }
 
   rpc endBlock(google.protobuf.Empty) returns(google.protobuf.Int64Value){
+    option (aelf.is_view) = true;
+  }
+  
+  rpc DistributeTokenPerBlock(google.protobuf.Empty) returns(aelf.BigIntValue){
     option (aelf.is_view) = true;
   }
 }

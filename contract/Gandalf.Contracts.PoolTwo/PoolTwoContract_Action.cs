@@ -44,7 +44,8 @@ namespace Gandalf.Contracts.PoolTwoContract
                     TokenType = 0
                 });
             }
-
+          
+            
             if (amount > 0)
             {
                 user.Amount = user.Amount.Sub(amount);
@@ -56,11 +57,12 @@ namespace Gandalf.Contracts.PoolTwoContract
                     To = sender
                 });
             }
-
-            user.RewardDebt = user.RewardDebt.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
+            
+            user.RewardDebt = user.Amount.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
             {
                 Value = Extension
             });
+            
             State.UserInfo[pid][sender] = user;
             State.PoolInfo.Value.PoolList[pid] = pool;
             Context.Fire(new Withdraw
@@ -95,7 +97,11 @@ namespace Gandalf.Contracts.PoolTwoContract
         private void DepositDistributeToken(int pid, BigIntValue amount, Address sender)
         {
             var pool = State.PoolInfo.Value.PoolList[pid];
-            var user = State.UserInfo[pid][sender];
+            var user = State.UserInfo[pid][sender] ?? new UserInfoStruct
+            {
+                Amount = 0,
+                RewardDebt = 0
+            };
             UpdatePool(pid);
             if (user.Amount > 0)
             {
@@ -118,33 +124,35 @@ namespace Gandalf.Contracts.PoolTwoContract
                         TokenType = 0
                     });
                 }
-
-                if (amount > 0)
-                {
-                    State.TokenContract.TransferFrom.Send(new TransferFromInput
-                    {
-                        From = Context.Sender,
-                        To = Context.Self,
-                        Amount = Convert.ToInt64(amount.Value),
-                        Symbol = State.DistributeToken.Value
-                    });
-                    user.Amount = user.Amount.Add(amount);
-                    pool.TotalAmount = pool.TotalAmount.Add(amount);
-                }
-
-                user.RewardDebt = user.Amount.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
-                {
-                    Value = Extension
-                });
-                State.UserInfo[pid][sender] = user;
-                State.PoolInfo.Value.PoolList[pid] = pool;
-                Context.Fire(new Deposit
-                {
-                    Amount = amount,
-                    Pid = pid,
-                    User = sender
-                });
             }
+            
+            
+            
+            if (amount > 0)
+            {
+                State.TokenContract.TransferFrom.Send(new TransferFromInput
+                {
+                    From = Context.Sender,
+                    To = Context.Self,
+                    Amount = Convert.ToInt64(amount.Value),
+                    Symbol = pool.LpToken
+                });
+                user.Amount = user.Amount.Add(amount);
+                pool.TotalAmount = pool.TotalAmount.Add(amount);
+            }
+            
+            user.RewardDebt = user.Amount.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
+            {
+                Value = Extension
+            });
+            State.UserInfo[pid][sender] = user;
+            State.PoolInfo.Value.PoolList[pid] = pool;
+            Context.Fire(new Deposit
+            {
+                Amount = amount,
+                Pid = pid,
+                User = sender
+            });
         }
 
         private void SafeDistributeTokenTransfer(Address to, BigIntValue amount)
@@ -175,8 +183,8 @@ namespace Gandalf.Contracts.PoolTwoContract
                 MassUpdatePools(new Empty());
             }
 
-            State.totalAllocPoint.Value =
-                State.totalAllocPoint.Value - State.PoolInfo.Value.PoolList[input.Pid].AllocPoint + input.AllocPoint;
+            State.TotalAllocPoint.Value =
+                State.TotalAllocPoint.Value - State.PoolInfo.Value.PoolList[input.Pid].AllocPoint + input.AllocPoint;
 
             State.PoolInfo.Value.PoolList[input.Pid].AllocPoint = input.AllocPoint;
             State.DistributeTokenPerBlock.Value = input.NewPerBlock;
@@ -194,12 +202,12 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         *  
+         *  Add
          */
         public override Empty Add(AddInput input)
         {
             AssertSenderIsOwner();
-            Assert(string.IsNullOrWhiteSpace(input.LpToken), "Token symbol null.");
+            Assert(!string.IsNullOrWhiteSpace(input.LpToken), "Token symbol null.");
             if (input.WithUpdate)
             {
                 MassUpdatePools(new Empty());
@@ -208,7 +216,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             var lastRewardBlock = Context.CurrentHeight > State.StartBlock.Value
                 ? Context.CurrentHeight
                 : State.StartBlock.Value;
-            State.totalAllocPoint.Value += input.AllocPoint;
+            State.TotalAllocPoint.Value += input.AllocPoint;
             var count = State.PoolInfo.Value.PoolList.Count;
             State.PoolInfo.Value.PoolList.Add(new PoolInfoStruct
             {
@@ -230,7 +238,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  SetDistributeTokenPerBlock
          */
         public override Empty SetDistributeTokenPerBlock(Int64Value input)
         {
@@ -286,14 +294,14 @@ namespace Gandalf.Contracts.PoolTwoContract
                 return new Empty();
             }
 
-            var distributeTokenReward = blockReward.Mul(pool.AllocPoint).Div(State.totalAllocPoint.Value);
+            var distributeTokenReward = blockReward.Mul(pool.AllocPoint).Div(State.TotalAllocPoint.Value);
 
             State.IssuedReward.Value = State.IssuedReward.Value.Add(distributeTokenReward);
             pool.AccDistributeTokenPerShare = pool.AccDistributeTokenPerShare.Add(
                 distributeTokenReward.Mul(new BigIntValue
                 {
                     Value = Extension
-                }).Mul(distributeTokenReward).Div(lpSupply)
+                }).Div(lpSupply)
             );
             pool.LastRewardBlock = Context.CurrentHeight;
             State.PoolInfo.Value.PoolList[pid] = pool;
@@ -355,6 +363,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             {
                 GetEndBlock(blockHeightBegin, restReward, out var newBlockHeighEnd, out var newReward);
                 restReward = newReward;
+                blockHeightEnd = newBlockHeighEnd;
                 blockHeightBegin = newBlockHeighEnd;
             }
 
@@ -363,15 +372,16 @@ namespace Gandalf.Contracts.PoolTwoContract
 
         private void GetEndBlock(long blockHeightBegin, BigIntValue restReward, out long blockEnd,
             out BigIntValue reward)
-        {   
+        {
             var value = Phase(blockHeightBegin).Value;
             var phase = blockHeightBegin > State.StartBlock.Value &&
                         blockHeightBegin.Sub(State.StartBlock.Value) % (State.HalvingPeriod.Value) == 0
                 ? value.Add(1)
                 : value;
             var endRewardBlock = (phase + 1).Mul(State.HalvingPeriod.Value).Add(State.StartBlock.Value);
-            var tmp = State.DistributeTokenPerBlock.Value.Div(2 ^ phase);
-            Assert(tmp> 0, "Error");
+            var tmp = State.DistributeTokenPerBlock.Value.Div(1 << (int) phase);
+
+            Assert(tmp > 0, "Error");
             reward = new BigIntValue(0);
             reward = tmp.Mul(endRewardBlock.Sub(blockHeightBegin));
             if (restReward >= reward)

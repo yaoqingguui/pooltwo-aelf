@@ -1,4 +1,5 @@
 using AElf;
+using AElf.Sdk.CSharp;
 using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
@@ -25,6 +26,10 @@ namespace Gandalf.Contracts.PoolTwoContract
             State.HalvingPeriod.Value = input.HalvingPeriod;
             State.StartBlock.Value = input.StartBlock;
             State.TotalReward.Value = input.TotalReward;
+            State.IssuedReward.Value = new BigIntValue(0);
+            State.TokenContract.Value =
+                Context.GetContractAddressByName(SmartContractConstants.TokenContractSystemName);
+            State.PoolInfo.Value = new PoolInfo();
             
             FixEndBlock(new BoolValue
             {

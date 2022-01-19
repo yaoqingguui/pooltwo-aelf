@@ -10,6 +10,14 @@ namespace Gandalf.Contracts.PoolTwoContract
     public partial class PoolTwoContract
     {
         /**
+         *  PoolInfo
+         */
+        public override PoolInfoStruct PoolInfo(Int32Value input)
+        {
+            return State.PoolInfo.Value.PoolList[input.Value];
+        }
+
+        /**
          * 
          */
         public override BigIntValue Pending(PendingInput input)
@@ -23,7 +31,7 @@ namespace Gandalf.Contracts.PoolTwoContract
                 if (Context.CurrentHeight > pool.LastRewardBlock)
                 {
                     var blockReward = GetDistributeTokenBlockReward(pool.LastRewardBlock);
-                    var distributeTokenReward = blockReward.Mul(pool.AllocPoint).Div(State.totalAllocPoint.Value);
+                    var distributeTokenReward = blockReward.Mul(pool.AllocPoint).Div(State.TotalAllocPoint.Value);
                     accDistributeTokenPerShare = accDistributeTokenPerShare.Add(
                         distributeTokenReward.Mul(new BigIntValue
                         {
@@ -41,6 +49,7 @@ namespace Gandalf.Contracts.PoolTwoContract
                     Value = Extension
                 }).Sub(user.RewardDebt);
             }
+
             return new BigIntValue(0);
         }
 
@@ -93,17 +102,8 @@ namespace Gandalf.Contracts.PoolTwoContract
          */
         public override BigIntValue Reward(Int64Value input)
         {
-            var phase = Phase(new Int64Value
-            {
-                Value = input.Value
-            });
-            return new BigIntValue
-            {
-                Value = State.DistributeTokenPerBlock.Value.Div(new BigIntValue
-                {
-                    Value = (2 ^ phase.Value).ToString()
-                }).ToString()
-            };
+            var phase = Phase(input);
+            return State.DistributeTokenPerBlock.Value.Div(1 << Convert.ToInt32(phase.Value));
         }
 
         /**
@@ -128,7 +128,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             {
                 return new Int64Value
                 {
-                    Value = (Context.CurrentHeight - State.StartBlock.Value - 1) / State.HalvingPeriod.Value
+                    Value = (blockNumber - State.StartBlock.Value - 1) / State.HalvingPeriod.Value
                 };
             }
 
@@ -136,13 +136,62 @@ namespace Gandalf.Contracts.PoolTwoContract
         }
 
         /**
-         * 
+         *  PoolLength
          */
         public override Int64Value PoolLength(Empty input)
         {
             return new Int64Value
             {
                 Value = State.PoolInfo.Value.PoolList.Count
+            };
+        }
+
+        /**
+         *  UserInfo
+         */
+        public override UserInfoStruct UserInfo(UserInfoInput input)
+        {
+            return State.UserInfo[input.Pid][input.User];
+        }
+        
+        /**
+         * DistributeTokenPerBlock
+         */
+        public override BigIntValue DistributeTokenPerBlock(Empty input)
+        {
+            return State.DistributeTokenPerBlock.Value;
+        }
+        
+        /**
+         *  TotalAllocPoint
+         */
+        public override Int64Value TotalAllocPoint(Empty input)
+        {
+            return new Int64Value
+            {
+                Value = State.TotalAllocPoint.Value
+            };
+        }   
+        
+        /**
+         * StartBlock
+         */
+        public override Int64Value StartBlock(Empty input)
+        {
+            return new Int64Value
+            {
+                Value = State.StartBlock.Value
+            };
+        }
+        
+        /**
+         * endBlock
+         */
+        public override Int64Value endBlock(Empty input)
+        {
+            return new Int64Value
+            {
+                Value = State.EndBlock.Value
             };
         }
     }

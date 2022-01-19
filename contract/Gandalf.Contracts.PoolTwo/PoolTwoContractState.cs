@@ -16,7 +16,7 @@ namespace Gandalf.Contracts.PoolTwoContract
         
         public MappedState<long,Address,UserInfoStruct> UserInfo { get; set; }
         public SingletonState<PoolInfo> PoolInfo { get; set; }
-        public Int64State totalAllocPoint { get; set; }
+        public Int64State TotalAllocPoint { get; set; }
         public Int64State HalvingPeriod { get; set; }
         public SingletonState<Address> FarmPoolOne { get; set; }
         public SingletonState<BigIntValue> TotalReward { get; set; }

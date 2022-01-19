@@ -1,4 +1,5 @@
 using AElf.Boilerplate.TestBase;
+using AElf.Contracts.MultiToken;
 using AElf.Cryptography.ECDSA;
 using Gandalf.Contracts.PoolTwoContract;
 
@@ -12,6 +13,11 @@ namespace Gandalf.Contracts.PoolTwo
         internal PoolTwoContractContainer.PoolTwoContractStub GetPoolTwoContractStub(ECKeyPair senderKeyPair)
         {
             return GetTester<PoolTwoContractContainer.PoolTwoContractStub>(DAppContractAddress, senderKeyPair);
+        }
+
+        internal TokenContractContainer.TokenContractStub GetTokenContractStub(ECKeyPair pair)
+        {
+            return GetTester<TokenContractContainer.TokenContractStub>(TokenContractAddress, pair);
         }
     }
 }
