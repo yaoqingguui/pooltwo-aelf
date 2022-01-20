@@ -149,6 +149,7 @@ namespace Gandalf.Contracts.PoolTwo
                 Symbol = DISTRIBUTETOKEN
             });
             balance.Balance.ShouldBe(pendingExpect);
+            
         }
 
         [Fact]
@@ -380,6 +381,20 @@ namespace Gandalf.Contracts.PoolTwo
                 Owner = Tom
             });
             withdrawDistributeTokenExpect.ShouldBe(balance.Balance);
+            
+            var issuedReward = await ownerStub.IssuedReward.CallAsync(new Empty());
+            issuedReward.ShouldBe(withdrawDistributeTokenExpect);
+            var totalReward = await ownerStub.TotalReward.CallAsync(new Empty());
+            totalReward.ShouldBe(9375000);
+
+            var distributeToken = await ownerStub.DistributeToken.CallAsync(new Empty());
+            distributeToken.Value.ShouldBe(DISTRIBUTETOKEN);
+            await ownerStub.SetFarmPoolOne.SendAsync(PoolOneMock);
+            var farmPoolOne = await ownerStub.FarmPoolOne.CallAsync(new Empty());
+            farmPoolOne.ShouldBe(PoolOneMock);
+
+            var endBlock = await ownerStub.endBlock.CallAsync(new Empty());
+            endBlock.Value.ShouldBe(2050);
         }
 
         [Fact]
