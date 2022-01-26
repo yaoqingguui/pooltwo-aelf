@@ -68,7 +68,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             Context.Fire(new Withdraw
             {
                 Pid = pid,
-                Amount = amount,
+                Amount = Convert.ToInt64(amount.Value),
                 User = sender
             });
         }
@@ -149,7 +149,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             State.PoolInfo.Value.PoolList[pid] = pool;
             Context.Fire(new Deposit
             {
-                Amount = amount,
+                Amount = Convert.ToInt64(amount.Value),
                 Pid = pid,
                 User = sender
             });
