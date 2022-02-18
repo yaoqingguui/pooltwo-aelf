@@ -1,6 +1,6 @@
 using AElf.Contracts.MultiToken;
 
-namespace Gandalf.Contracts.PoolTwoContract
+namespace Awaken.Contracts.PoolTwoContract
 {
     public partial class PoolTwoContractState
     {

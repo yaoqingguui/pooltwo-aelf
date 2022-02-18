@@ -1,9 +1,9 @@
 using AElf.Boilerplate.TestBase;
 using AElf.Contracts.MultiToken;
 using AElf.Cryptography.ECDSA;
-using Gandalf.Contracts.PoolTwoContract;
+using Awaken.Contracts.PoolTwoContract;
 
-namespace Gandalf.Contracts.PoolTwo
+namespace Awaken.Contracts.PoolTwo
 {
     public class PoolTwoContractTestBase : DAppContractTestBase<PoolTwoContractTestModule>
     {

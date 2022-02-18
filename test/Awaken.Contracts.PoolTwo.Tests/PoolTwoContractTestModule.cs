@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
 using Volo.Abp.Modularity;
 
-namespace Gandalf.Contracts.PoolTwo
+namespace Awaken.Contracts.PoolTwo
 {
     [DependsOn(typeof(MainChainDAppContractTestModule))]
     public class PoolTwoContractTestModule : MainChainDAppContractTestModule
@@ -20,7 +20,7 @@ namespace Gandalf.Contracts.PoolTwo
         public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
         {
             var contractCodeProvider = context.ServiceProvider.GetService<IContractCodeProvider>();
-            var contractDllLocation = typeof(Contracts.PoolTwoContract.PoolTwoContract).Assembly.Location;
+            var contractDllLocation = typeof(Awaken.Contracts.PoolTwoContract.PoolTwoContract).Assembly.Location;
             var contractCodes = new Dictionary<string, byte[]>(contractCodeProvider.Codes)
             {
                 {

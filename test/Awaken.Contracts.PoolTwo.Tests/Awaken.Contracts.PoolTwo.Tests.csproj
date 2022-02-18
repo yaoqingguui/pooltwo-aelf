@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>Gandalf.Contracts.PoolTwo</RootNamespace>
+    <RootNamespace>Awaken.Contracts.PoolTwo</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\contract\Gandalf.Contracts.PoolTwo\Gandalf.Contracts.PoolTwo.csproj" />
+    <ProjectReference Include="..\..\contract\Awaken.Contracts.PoolTwo\Awaken.Contracts.PoolTwo.csproj" />
     <ProjectReference Include="..\..\src\AElf.Boilerplate.TestBase\AElf.Boilerplate.TestBase.csproj" />
   </ItemGroup>
 

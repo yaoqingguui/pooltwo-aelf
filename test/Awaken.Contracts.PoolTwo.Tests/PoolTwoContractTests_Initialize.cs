@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AElf.Contracts.MultiToken;
@@ -8,12 +7,12 @@ using AElf.CSharp.Core;
 using AElf.Kernel;
 using AElf.Kernel.Blockchain.Application;
 using AElf.Types;
-using Gandalf.Contracts.PoolTwoContract;
+using Awaken.Contracts.PoolTwoContract;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Volo.Abp.Threading;
 
-namespace Gandalf.Contracts.PoolTwo
+namespace Awaken.Contracts.PoolTwo
 {
     public partial class PoolTwoContractTests
     {

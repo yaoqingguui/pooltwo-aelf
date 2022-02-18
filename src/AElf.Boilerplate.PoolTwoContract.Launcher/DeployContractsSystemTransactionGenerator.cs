@@ -49,7 +49,7 @@ namespace AElf.Boilerplate.PoolTwoContract.Launcher
         private byte[] GetContractCodes()
         {
             return ContractsDeployer.GetContractCodes<DeployContractsSystemTransactionGenerator>(_contractOptions
-                .GenesisContractDir)["Gandalf.Contracts.PoolTwoContract"];
+                .GenesisContractDir)["Awaken.Contracts.PoolTwoContract"];
         }
     }
 }

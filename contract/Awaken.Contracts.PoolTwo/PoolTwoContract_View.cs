@@ -1,11 +1,9 @@
 using System;
-using System.Numerics;
-using System.Text.RegularExpressions;
 using AElf.CSharp.Core;
 using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
-namespace Gandalf.Contracts.PoolTwoContract
+namespace Awaken.Contracts.PoolTwoContract
 {
     public partial class PoolTwoContract
     {   

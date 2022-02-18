@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using AElf.Contracts.MultiToken;
 using AElf.CSharp.Core;
 using AElf.Types;
-using Gandalf.Contracts.PoolTwoContract;
+using Awaken.Contracts.PoolTwoContract;
 using Google.Protobuf.WellKnownTypes;
 using Shouldly;
 using Xunit;
 
-namespace Gandalf.Contracts.PoolTwo
+namespace Awaken.Contracts.PoolTwo
 {
     public partial class PoolTwoContractTests : PoolTwoContractTestBase
     {
@@ -23,10 +23,10 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, true);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, true);
             var totalAllocPoint = await ownerStub.TotalAllocPoint.CallAsync(new Empty());
-            totalAllocPoint.Value.ShouldBe(20);
+            ShouldBeTestExtensions.ShouldBe<long>(totalAllocPoint.Value, 20);
             
         }
         
@@ -38,15 +38,15 @@ namespace Gandalf.Contracts.PoolTwo
             var allocPoint = 10;
             await ownerStub.SetFarmPoolOne.SendAsync(PoolOneMock);
             
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, true);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, true);
             var poolTwoContractStub = GetPoolTwoContractStub(PoolOneMockPair);
             var tokenContractStub = GetTokenContractStub(PoolOneMockPair);
             await tokenContractStub.Approve.SendAsync(new ApproveInput
             {
                 Amount = 10000000,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
             
             await poolTwoContractStub.ReDeposit.SendAsync(new ReDepositInput
@@ -73,7 +73,7 @@ namespace Gandalf.Contracts.PoolTwo
                 Value = 600
             });
             var value = await ownerStub.HalvingPeriod.CallAsync(new Empty());
-            value.Value.ShouldBe(600);
+            ShouldBeTestExtensions.ShouldBe<long>(value.Value, 600);
             
         }
 
@@ -82,8 +82,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, true);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, true);
             var amount = 10000000000;
             var tomPoolStub = GetPoolTwoContractStub(TomPair);
             var tomTokenStub = GetTokenContractStub(TomPair);
@@ -93,7 +93,7 @@ namespace Gandalf.Contracts.PoolTwo
             {
                 Amount = amount,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
             await tomPoolStub.Deposit.SendAsync(new DepositInput
             {
@@ -105,14 +105,14 @@ namespace Gandalf.Contracts.PoolTwo
 
             var skipBlocks = startBlock.Add(100).Sub(currentBlockHeight);
             currentBlockHeight = await SkipBlocks(skipBlocks);
-            currentBlockHeight.ShouldBe(150);
+            ShouldBeTestExtensions.ShouldBe<long>(currentBlockHeight, 150);
             //deposit again
             await tomPoolStub.Deposit.SendAsync(new DepositInput
             {
                 Amount = amount / 2,
                 Pid = 1
             });
-            var depoistBlock = currentBlockHeight.Add(1);
+            var depoistBlock = SafeMath.Add((long) currentBlockHeight, 1);
             // move to start+200
             skipBlocks = startBlock.Add(200).Sub(depoistBlock);
             currentBlockHeight = await SkipBlocks(skipBlocks);
@@ -125,7 +125,7 @@ namespace Gandalf.Contracts.PoolTwo
 
             var pendingOneDeposit = depoistBlock.Sub(startBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
-            var pendingTwoDeposit = currentBlockHeight.Add(1).Sub(depoistBlock)
+            var pendingTwoDeposit = SafeMath.Add((long) currentBlockHeight, 1).Sub(depoistBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
 
             var pendingExpect = pendingOneDeposit.Add(pendingTwoDeposit);
@@ -146,7 +146,7 @@ namespace Gandalf.Contracts.PoolTwo
             var balance = await tomTokenStub.GetBalance.CallAsync(new GetBalanceInput
             {
                 Owner = Tom,
-                Symbol = DISTRIBUTETOKEN
+                Symbol = PoolTwoContractTests.DISTRIBUTETOKEN
             });
             balance.Balance.ShouldBe(pendingExpect);
             
@@ -157,8 +157,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             var amount = 10000000000;
             var tomPoolStub = GetPoolTwoContractStub(TomPair);
             var tomTokenStub = GetTokenContractStub(TomPair);
@@ -166,7 +166,7 @@ namespace Gandalf.Contracts.PoolTwo
             {
                 Amount = amount,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
             var startBlock = (await tomPoolStub.StartBlock.CallAsync(new Empty())).Value;
             var currentBlockHeight = await GetCurrentBlockHeight();
@@ -177,7 +177,7 @@ namespace Gandalf.Contracts.PoolTwo
                 Amount = amount,
                 Pid = 1
             });
-            var depositBlock = currentBlockHeight.Add(1);
+            var depositBlock = SafeMath.Add((long) currentBlockHeight, 1);
 
             //skip to withdraw blocks
             currentBlockHeight = await GetCurrentBlockHeight();
@@ -189,10 +189,10 @@ namespace Gandalf.Contracts.PoolTwo
                 Pid = 1,
                 User = Tom
             });
-            var stageOneEndBlock = startBlock.Add(HalvingPeriod);
+            var stageOneEndBlock = startBlock.Add(PoolTwoContractTests.HalvingPeriod);
             var pendingStageOneExpect = stageOneEndBlock.Sub(depositBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
-            var pendingStageTwoExpect = currentBlockHeight.Add(1).Sub(stageOneEndBlock)
+            var pendingStageTwoExpect = SafeMath.Add((long) currentBlockHeight, 1).Sub(stageOneEndBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value))
                 .Div(2).Div(2);
             var pendingExpect = pendingStageOneExpect.Add(pendingStageTwoExpect);
@@ -213,7 +213,7 @@ namespace Gandalf.Contracts.PoolTwo
             var balance = await tomTokenStub.GetBalance.CallAsync(new GetBalanceInput
             {
                 Owner = Tom,
-                Symbol = DISTRIBUTETOKEN
+                Symbol = PoolTwoContractTests.DISTRIBUTETOKEN
             });
             balance.Balance.ShouldBe(withdrawDistributeTokenExpect);
         }
@@ -223,8 +223,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             var tomPoolStub = GetPoolTwoContractStub(TomPair);
             var tomTokenStub = GetTokenContractStub(TomPair);
             var amount = 10000000000;
@@ -233,7 +233,7 @@ namespace Gandalf.Contracts.PoolTwo
             {
                 Amount = amount,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
 
             await tomPoolStub.Deposit.SendAsync(new DepositInput
@@ -243,7 +243,7 @@ namespace Gandalf.Contracts.PoolTwo
             });
             //skip to withdraw blocks (600)
             var currentBlockHeight = await GetCurrentBlockHeight();
-            var skipBlocks = startBlock.Add(600).Sub(currentBlockHeight);
+            var skipBlocks = SafeMath.Add((long) startBlock, 600).Sub(currentBlockHeight);
             currentBlockHeight = await SkipBlocks(skipBlocks);
             var distributeTokenPerBlock = await tomPoolStub.DistributeTokenPerBlock.CallAsync(new Empty());
             var pending = await tomPoolStub.Pending.CallAsync(new PendingInput
@@ -251,10 +251,10 @@ namespace Gandalf.Contracts.PoolTwo
                 Pid = 1,
                 User = Tom
             });
-            var stageOneEndBlock = startBlock.Add(HalvingPeriod);
+            var stageOneEndBlock = SafeMath.Add((long) startBlock, PoolTwoContractTests.HalvingPeriod);
             var pendingStageOneExpect = stageOneEndBlock.Sub(startBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
-            var pendingStageTwoExpect = currentBlockHeight.Add(1).Sub(stageOneEndBlock)
+            var pendingStageTwoExpect = SafeMath.Add((long) currentBlockHeight, 1).Sub(stageOneEndBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2).Div(2);
             var pendingExpect = pendingStageOneExpect.Add(pendingStageTwoExpect);
             pending.ShouldBe(pendingExpect);
@@ -268,7 +268,7 @@ namespace Gandalf.Contracts.PoolTwo
             var withdrawDistributeTokenStageOneExpect = stageOneEndBlock.Sub(startBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
 
-            var withdrawDistributeTokenStageTwoExpect = currentBlockHeight.Add(1).Sub(stageOneEndBlock)
+            var withdrawDistributeTokenStageTwoExpect = SafeMath.Add((long) currentBlockHeight, 1).Sub(stageOneEndBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2).Div(2);
 
             var withdrawDistributeTokenExpect =
@@ -277,7 +277,7 @@ namespace Gandalf.Contracts.PoolTwo
             var balance = await tomTokenStub.GetBalance.CallAsync(new GetBalanceInput
             {
                 Owner = Tom,
-                Symbol = DISTRIBUTETOKEN
+                Symbol = PoolTwoContractTests.DISTRIBUTETOKEN
             });
             balance.Balance.ShouldBe(withdrawDistributeTokenExpect);
         }
@@ -288,8 +288,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             var startBlock = await ownerStub.StartBlock.CallAsync(new Empty());
             var tomPoolStub = GetPoolTwoContractStub(TomPair);
             var tomTokenStub = GetTokenContractStub(TomPair);
@@ -297,7 +297,7 @@ namespace Gandalf.Contracts.PoolTwo
             {
                 Amount = 10000000000,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
             var currentBlockHeight = await GetCurrentBlockHeight();
             var skipBlock = (startBlock.Value - currentBlockHeight + 20);
@@ -307,7 +307,7 @@ namespace Gandalf.Contracts.PoolTwo
                 Amount = 10000000000,
                 Pid = 1
             });
-            var depositBlock = currentBlockHeight.Add(1);
+            var depositBlock = SafeMath.Add((long) currentBlockHeight, 1);
             // skip to withdraw height.
             currentBlockHeight = await SkipBlocks(50);
             var distributeTokenPerBlock = await tomPoolStub.DistributeTokenPerBlock.CallAsync(new Empty());
@@ -316,7 +316,7 @@ namespace Gandalf.Contracts.PoolTwo
                 Pid = 1,
                 User = Tom
             });
-            var pendingExpect = (currentBlockHeight.Add(1).Sub(depositBlock))
+            var pendingExpect = (SafeMath.Add((long) currentBlockHeight, 1).Sub(depositBlock))
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value)).Div(2);
             pending.ShouldBe(pendingExpect);
             await tomPoolStub.Withdraw.SendAsync(new WithdrawInput
@@ -325,12 +325,12 @@ namespace Gandalf.Contracts.PoolTwo
                 Pid = 1
             });
 
-            var withdrawDistributeTokenExpect = currentBlockHeight.Add(1).Sub(depositBlock)
+            var withdrawDistributeTokenExpect = SafeMath.Add((long) currentBlockHeight, 1).Sub(depositBlock)
                 .Mul(Convert.ToInt64(distributeTokenPerBlock.Value).Div(2));
             var balance = await tomTokenStub.GetBalance.CallAsync(new GetBalanceInput
             {
                 Owner = Tom,
-                Symbol = DISTRIBUTETOKEN
+                Symbol = PoolTwoContractTests.DISTRIBUTETOKEN
             });
             balance.Balance.ShouldBe(withdrawDistributeTokenExpect);
         }
@@ -340,8 +340,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             var startBlock = await ownerStub.StartBlock.CallAsync(new Empty());
             var tomPoolStub = GetPoolTwoContractStub(TomPair);
             var tomTokenStub = GetTokenContractStub(TomPair);
@@ -349,7 +349,7 @@ namespace Gandalf.Contracts.PoolTwo
             {
                 Amount = 10000000000,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
             await tomPoolStub.Deposit.SendAsync(new DepositInput
             {
@@ -364,7 +364,7 @@ namespace Gandalf.Contracts.PoolTwo
                 User = Tom
             });
 
-            var pendingExpect = distributeTokenPerBlock.Div(2).Mul(currentBlock.Sub(startBlock.Value).Add(1));
+            var pendingExpect = distributeTokenPerBlock.Div(2).Mul(SafeMath.Sub((long) currentBlock, (long) startBlock.Value).Add(1));
             pendingExpect.ShouldBe(pending);
 
             await tomPoolStub.Withdraw.SendAsync(new WithdrawInput
@@ -374,27 +374,27 @@ namespace Gandalf.Contracts.PoolTwo
             });
             var currentBlockHeight = await GetCurrentBlockHeight();
             var withdrawDistributeTokenExpect =
-                distributeTokenPerBlock.Div(2).Mul(currentBlockHeight.Sub(startBlock.Value));
+                distributeTokenPerBlock.Div(2).Mul(SafeMath.Sub((long) currentBlockHeight, (long) startBlock.Value));
             var balance = await tomTokenStub.GetBalance.CallAsync(new GetBalanceInput
             {
-                Symbol = DISTRIBUTETOKEN,
+                Symbol = PoolTwoContractTests.DISTRIBUTETOKEN,
                 Owner = Tom
             });
             withdrawDistributeTokenExpect.ShouldBe(balance.Balance);
             
             var issuedReward = await ownerStub.IssuedReward.CallAsync(new Empty());
-            issuedReward.ShouldBe(withdrawDistributeTokenExpect);
+            ShouldBeTestExtensions.ShouldBe(issuedReward, withdrawDistributeTokenExpect);
             var totalReward = await ownerStub.TotalReward.CallAsync(new Empty());
-            totalReward.ShouldBe(9375000);
+            ShouldBeTestExtensions.ShouldBe<BigIntValue>(totalReward, 9375000);
 
             var distributeToken = await ownerStub.DistributeToken.CallAsync(new Empty());
-            distributeToken.Value.ShouldBe(DISTRIBUTETOKEN);
+            ShouldBeStringTestExtensions.ShouldBe(distributeToken.Value, PoolTwoContractTests.DISTRIBUTETOKEN);
             await ownerStub.SetFarmPoolOne.SendAsync(PoolOneMock);
             var farmPoolOne = await ownerStub.FarmPoolOne.CallAsync(new Empty());
             farmPoolOne.ShouldBe(PoolOneMock);
 
             var endBlock = await ownerStub.endBlock.CallAsync(new Empty());
-            endBlock.Value.ShouldBe(2050);
+            ShouldBeTestExtensions.ShouldBe<long>(endBlock.Value, 2050);
         }
 
         [Fact]
@@ -402,14 +402,14 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             await ownerStub.SetDistributeTokenPerBlock.SendAsync(new Int64Value
             {
                 Value = 500
             });
             var value = await ownerStub.DistributeTokenPerBlock.CallAsync(new Empty());
-            value.Value.ShouldBe("500");
+            ShouldBeStringTestExtensions.ShouldBe(value.Value, "500");
         }
 
 
@@ -418,8 +418,8 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             await ownerStub.Set.SendAsync(new SetInput
             {
                 Pid = 1,
@@ -432,11 +432,11 @@ namespace Gandalf.Contracts.PoolTwo
                 Value = 1
             });
 
-            pool.AllocPoint.ShouldBe(20);
+            ShouldBeTestExtensions.ShouldBe<long>(pool.AllocPoint, 20);
             var int64Value = await ownerStub.TotalAllocPoint.CallAsync(new Empty());
-            int64Value.Value.ShouldBe(20 - 10 + 20);
+            ShouldBeTestExtensions.ShouldBe<long>(int64Value.Value, 20 - 10 + 20);
             var value = await ownerStub.DistributeTokenPerBlock.CallAsync(new Empty());
-            value.Value.ShouldBe("500");
+            ShouldBeStringTestExtensions.ShouldBe(value.Value, "500");
         }
 
         [Fact]
@@ -444,23 +444,23 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocPoint = 10;
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocPoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocPoint, PoolTwoContractTests.LPTOKEN_01, false);
             var pool = await ownerStub.PoolInfo.CallAsync(new Int32Value
             {
                 Value = 1
             });
-            pool.LpToken.ShouldBe(LPTOKEN_01);
-            pool.AllocPoint.ShouldBe(allocPoint);
+            ShouldBeStringTestExtensions.ShouldBe(pool.LpToken, PoolTwoContractTests.LPTOKEN_01);
+            ShouldBeTestExtensions.ShouldBe<long>(pool.AllocPoint, allocPoint);
             var length = await ownerStub.PoolLength.CallAsync(new Empty());
-            length.Value.ShouldBe(2);
+            ShouldBeTestExtensions.ShouldBe<long>(length.Value, 2);
             var currentBlockHeight = await GetCurrentBlockHeight();
 
             var reward = await ownerStub.Reward.CallAsync(new Int64Value
             {
                 Value = currentBlockHeight
             });
-            reward.Value.ShouldBe("10000");
+            ShouldBeStringTestExtensions.ShouldBe(reward.Value, "10000");
         }
 
         [Fact]
@@ -468,14 +468,14 @@ namespace Gandalf.Contracts.PoolTwo
         {
             var ownerStub = await Initialize();
             var allocpoint = 10;
-            await AddPoolFunc(ownerStub, allocpoint, LPTOKEN_01, false);
-            await AddPoolFunc(ownerStub, allocpoint, LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocpoint, PoolTwoContractTests.LPTOKEN_01, false);
+            await AddPoolFunc(ownerStub, allocpoint, PoolTwoContractTests.LPTOKEN_01, false);
             var tomTokenStub = GetTokenContractStub(TomPair);
             await tomTokenStub.Approve.SendAsync(new ApproveInput
             {
                 Amount = 10000000,
                 Spender = DAppContractAddress,
-                Symbol = LPTOKEN_01
+                Symbol = PoolTwoContractTests.LPTOKEN_01
             });
 
             var tomPoolStub = GetPoolTwoContractStub(TomPair);

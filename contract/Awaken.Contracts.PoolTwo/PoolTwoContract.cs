@@ -3,7 +3,7 @@ using AElf.Sdk.CSharp;
 using AElf.Types;
 using Google.Protobuf.WellKnownTypes;
 
-namespace Gandalf.Contracts.PoolTwoContract
+namespace Awaken.Contracts.PoolTwoContract
 {
     /// <summary>
     /// The C# implementation of the contract defined in pool_two_contract.proto that is located in the "protobuf"
