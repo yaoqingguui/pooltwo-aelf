@@ -44,8 +44,12 @@ namespace Gandalf.Contracts.PoolTwoContract
                     TokenType = 0
                 });
             }
-          
-            
+
+            if (!long.TryParse(amount.Value, out long parseOut))
+            {
+                throw new AssertionException($"Failed to parse {amount.Value}");
+            }
+
             if (amount > 0)
             {
                 user.Amount = user.Amount.Sub(amount);
@@ -53,22 +57,22 @@ namespace Gandalf.Contracts.PoolTwoContract
                 State.TokenContract.Transfer.Send(new TransferInput
                 {
                     Symbol = pool.LpToken,
-                    Amount = Convert.ToInt64(amount.Value),
+                    Amount = parseOut,
                     To = sender
                 });
             }
-            
+
             user.RewardDebt = user.Amount.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
             {
                 Value = Extension
             });
-            
+
             State.UserInfo[pid][sender] = user;
             State.PoolInfo.Value.PoolList[pid] = pool;
             Context.Fire(new Withdraw
             {
                 Pid = pid,
-                Amount = Convert.ToInt64(amount.Value),
+                Amount = parseOut,
                 User = sender
             });
         }
@@ -125,22 +129,25 @@ namespace Gandalf.Contracts.PoolTwoContract
                     });
                 }
             }
-            
-            
-            
+
+            if (!long.TryParse(amount.Value, out long parseOut))
+            {
+                throw new AssertionException($"Failed to parse {amount.Value}");
+            }
+
             if (amount > 0)
             {
                 State.TokenContract.TransferFrom.Send(new TransferFromInput
                 {
                     From = Context.Sender,
                     To = Context.Self,
-                    Amount = Convert.ToInt64(amount.Value),
+                    Amount = parseOut,
                     Symbol = pool.LpToken
                 });
                 user.Amount = user.Amount.Add(amount);
                 pool.TotalAmount = pool.TotalAmount.Add(amount);
             }
-            
+
             user.RewardDebt = user.Amount.Mul(pool.AccDistributeTokenPerShare).Div(new BigIntValue
             {
                 Value = Extension
@@ -149,7 +156,7 @@ namespace Gandalf.Contracts.PoolTwoContract
             State.PoolInfo.Value.PoolList[pid] = pool;
             Context.Fire(new Deposit
             {
-                Amount = Convert.ToInt64(amount.Value),
+                Amount = parseOut,
                 Pid = pid,
                 User = sender
             });
@@ -164,10 +171,15 @@ namespace Gandalf.Contracts.PoolTwoContract
             }).Balance;
             amount = amount > distributeTokenBal ? distributeTokenBal : amount;
 
+            if (!long.TryParse(amount.Value, out long parseOut))
+            {
+                throw new AssertionException($"Failed to parse {amount.Value}");
+            }
+
             State.TokenContract.Transfer.Send(new TransferInput
             {
                 To = to,
-                Amount = Convert.ToInt64(amount.Value),
+                Amount = parseOut,
                 Symbol = State.DistributeToken.Value
             });
         }
@@ -380,6 +392,12 @@ namespace Gandalf.Contracts.PoolTwoContract
                 : value;
             var endRewardBlock = (phase + 1).Mul(State.HalvingPeriod.Value).Add(State.StartBlock.Value);
             var tmp = State.DistributeTokenPerBlock.Value.Div(1 << (int) phase);
+            if (phase < 200 && tmp.Value.Equals("0"))
+            {
+                blockEnd = endRewardBlock;
+                reward = 0;
+                return;
+            }
 
             Assert(tmp > 0, "Error");
             reward = new BigIntValue(0);
@@ -391,7 +409,11 @@ namespace Gandalf.Contracts.PoolTwoContract
             }
             else
             {
-                blockEnd = Convert.ToInt64(restReward.Div(tmp).Add(blockHeightBegin).ToString());
+                var blockEndStr = restReward.Div(tmp).Add(blockHeightBegin).Value;
+                if (!long.TryParse(blockEndStr, out blockEnd))
+                {
+                    throw new AssertionException($"Failed to parse {blockEndStr}");
+                }
             }
         }
     }
