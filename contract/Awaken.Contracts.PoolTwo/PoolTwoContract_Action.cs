@@ -344,6 +344,10 @@ namespace Awaken.Contracts.PoolTwoContract
         {
             AssertSenderIsOwner();
             State.HalvingPeriod.Value = input.Value;
+            Context.Fire(new HalvingPeriodSet
+            {
+                Period = State.HalvingPeriod.Value
+            });
             return new Empty();
         }
 
