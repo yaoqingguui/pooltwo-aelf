@@ -122,7 +122,7 @@ namespace Awaken.Contracts.PoolTwoContract
                     {
                         User = sender,
                         Pid = pid,
-                        TokenSymbol = pool.LpToken,
+                        TokenSymbol = State.DistributeToken.Value,
                         Amount = pendingAmount,
                         TokenType = 0
                     });
