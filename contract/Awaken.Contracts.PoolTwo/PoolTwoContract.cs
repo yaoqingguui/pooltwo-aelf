@@ -12,8 +12,7 @@ namespace Awaken.Contracts.PoolTwoContract
     /// </summary>
     public partial class PoolTwoContract : PoolTwoContractContainer.PoolTwoContractBase
     {
-
-        public const string Extension = "1000000000000";
+        private const string Extension = "1000000000000";
         
         public override Empty Initialize(InitializeInput input)
         {
