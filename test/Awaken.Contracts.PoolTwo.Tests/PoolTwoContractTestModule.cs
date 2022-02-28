@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using AElf.Boilerplate.TestBase;
-using AElf.Contracts.MultiToken;
 using AElf.ContractTestBase;
 using AElf.Kernel.SmartContract.Application;
 using Awaken.Contracts.PoolTwo.ContractInitializationProviders;
+using Awaken.Contracts.Token;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
 using Volo.Abp.Modularity;
