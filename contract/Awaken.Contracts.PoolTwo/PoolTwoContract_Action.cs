@@ -8,6 +8,14 @@ namespace Awaken.Contracts.PoolTwoContract
 {
     public partial class PoolTwoContract
     {
+        public override Empty SetLpTokenAddress(SetLpTokenAddressInput input)
+        {   
+            AssertSenderIsOwner();
+            Assert(input.AwakenTokenContractAddress!=null,"Invalid input.");
+            State.LpTokenContract.Value = input.AwakenTokenContractAddress;
+            return new Empty();
+        }
+
         /**
          * withdraw
          */
@@ -16,7 +24,7 @@ namespace Awaken.Contracts.PoolTwoContract
             WithdrawDistributeToken(input.Pid, input.Amount, Context.Sender);
             return new Empty();
         }
-
+        
         private void WithdrawDistributeToken(int pid, BigIntValue amount, Address sender)
         {
             var pool = State.PoolInfo.Value.PoolList[pid];
@@ -53,7 +61,7 @@ namespace Awaken.Contracts.PoolTwoContract
             {
                 user.Amount = user.Amount.Sub(amount);
                 pool.TotalAmount = pool.TotalAmount.Sub(amount);
-                State.TokenContract.Transfer.Send(new TransferInput
+                State.LpTokenContract.Transfer.Send(new Token.TransferInput
                 {
                     Symbol = pool.LpToken,
                     Amount = parseOut,
@@ -136,7 +144,7 @@ namespace Awaken.Contracts.PoolTwoContract
 
             if (amount > 0)
             {
-                State.TokenContract.TransferFrom.Send(new TransferFromInput
+                State.LpTokenContract.TransferFrom.Send(new Token.TransferFromInput
                 {
                     From = Context.Sender,
                     To = Context.Self,

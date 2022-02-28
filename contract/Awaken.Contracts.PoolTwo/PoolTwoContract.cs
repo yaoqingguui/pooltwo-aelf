@@ -29,6 +29,7 @@ namespace Awaken.Contracts.PoolTwoContract
             State.TokenContract.Value =
                 Context.GetContractAddressByName(SmartContractConstants.TokenContractSystemName);
             State.PoolInfo.Value = new PoolInfo();
+            State.LpTokenContract.Value = input.AwakenTokenContract;
             
             FixEndBlock(new BoolValue
             {

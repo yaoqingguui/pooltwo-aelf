@@ -45,7 +45,9 @@ service PoolTwoContract {
   rpc Withdraw(WithdrawInput) returns(google.protobuf.Empty){}
 
   rpc FixEndBlock(google.protobuf.BoolValue) returns(google.protobuf.Empty){}
-
+  
+  rpc SetLpTokenAddress(SetLpTokenAddressInput) returns(google.protobuf.Empty){}
+  
   //  View
   rpc PoolLength(google.protobuf.Empty) returns(google.protobuf.Int64Value){
     option (aelf.is_view) = true;
@@ -113,6 +115,10 @@ service PoolTwoContract {
 }
 
 //Input&Output
+message SetLpTokenAddressInput{
+  aelf.Address awaken_token_contract_address =1;
+}
+
 message UserInfoInput{
   int32 pid = 1;
   aelf.Address user = 2;
@@ -158,6 +164,7 @@ message InitializeInput{
   int64 start_block = 4;
   aelf.BigIntValue  total_reward = 5;
   aelf.Address owner = 6;
+  aelf.Address awaken_token_contract =7;
 }
 
 
