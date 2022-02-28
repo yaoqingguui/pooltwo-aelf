@@ -27,7 +27,7 @@ namespace Awaken.Contracts.PoolTwo
         
         
         // constants
-        private const string DISTRIBUTETOKEN = "ISTAR";
+        private const string DISTRIBUTETOKEN = "AWAKEN";
         private const string LPTOKEN_01 = "AAAE";
         private const string LPTOKEN_02 = "AAAB";
         private const long HalvingPeriod = 500;
@@ -41,7 +41,7 @@ namespace Awaken.Contracts.PoolTwo
             Tom = Address.FromPublicKey(TomPair.PublicKey);
             PoolOneMockPair = SampleAccount.Accounts[2].KeyPair;
             PoolOneMock = Address.FromPublicKey(PoolOneMockPair.PublicKey);
-
+            
             var stub = GetPoolTwoContractStub(OwnerPair);
             await stub.Initialize.SendAsync(new InitializeInput
             {
@@ -51,12 +51,24 @@ namespace Awaken.Contracts.PoolTwo
                 StartBlock = 50,
                 TotalReward = 9375000,
                 DistributeTokenPerBlock = 10000,
+                AwakenTokenContract = LpTokenContractAddress
             });
+            
+            await InitLpTokenContract();
             
             await CreateToken();
             return stub;
         }
-
+        
+        private async Task InitLpTokenContract()
+        {
+            var lpTokenContractStub = GetLpTokenContractStub(OwnerPair);
+            await lpTokenContractStub.Initialize.SendAsync(new Token.InitializeInput
+            {
+                Owner = Owner
+            });
+        }
+        
         private async Task CreateToken()
         {
             var tokenStub = GetTokenContractStub(OwnerPair);
@@ -84,10 +96,10 @@ namespace Awaken.Contracts.PoolTwo
                     Symbol = DISTRIBUTETOKEN,
                     To = DAppContractAddress
             });
-            
-            
-            
-            await tokenStub.Create.SendAsync(new CreateInput
+
+            // Lp token
+            var lpTokenStub = GetLpTokenContractStub(OwnerPair);
+            await lpTokenStub.Create.SendAsync(new Token.CreateInput
             {
                 Decimals = 6,
                 Issuer = Owner,
@@ -97,7 +109,7 @@ namespace Awaken.Contracts.PoolTwo
                 TotalSupply = 10000000000000,
             });
 
-            await tokenStub.Issue.SendAsync(new IssueInput
+            await lpTokenStub.Issue.SendAsync(new Token.IssueInput
             {
                 Amount = 10000000000000,
                 Symbol = LPTOKEN_01,
@@ -108,22 +120,22 @@ namespace Awaken.Contracts.PoolTwo
             /**
              * transfer to tom.
              */
-            await tokenStub.Transfer.SendAsync(new TransferInput
+            await lpTokenStub.Transfer.SendAsync(new Token.TransferInput
             {
                 Amount = 10000000000,
                 Symbol = LPTOKEN_01,
                 To = Tom
             });
 
-
-            await tokenStub.Transfer.SendAsync(new TransferInput
+            
+            await lpTokenStub.Transfer.SendAsync(new Token.TransferInput
             {
                 Amount = 10000000000,
                 Symbol = LPTOKEN_01,
                 To = PoolOneMock
             });
             
-            await tokenStub.Create.SendAsync(new CreateInput
+            await lpTokenStub.Create.SendAsync(new Token.CreateInput
             {
                 Decimals = 5,
                 Issuer = Owner,
@@ -133,7 +145,7 @@ namespace Awaken.Contracts.PoolTwo
                 TotalSupply = 100000000000000
             });
 
-            await tokenStub.Issue.SendAsync(new IssueInput
+            await lpTokenStub.Issue.SendAsync(new Token.IssueInput
             {
                 Amount = 100000000000000,
                 Symbol = LPTOKEN_02,
@@ -161,11 +173,11 @@ namespace Awaken.Contracts.PoolTwo
         
         private async Task<long> SkipBlocks(long skipBlocks)
         {
-            var tokenStub = GetTokenContractStub(OwnerPair);
+            var tokenStub = GetLpTokenContractStub(OwnerPair);
             var first = (await GetChain()).BestChainHeight;
             for (int i = 0; i < skipBlocks; i++)
             {
-                await tokenStub.Transfer.SendAsync(new TransferInput
+                await tokenStub.Transfer.SendAsync(new Token.TransferInput
                 {
                     Symbol = LPTOKEN_02,
                     Amount = 1,

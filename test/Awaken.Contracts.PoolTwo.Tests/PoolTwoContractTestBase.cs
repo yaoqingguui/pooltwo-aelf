@@ -1,6 +1,9 @@
 using AElf.Boilerplate.TestBase;
+using AElf.Boilerplate.TestBase.SmartContractNameProvider;
 using AElf.Contracts.MultiToken;
 using AElf.Cryptography.ECDSA;
+using AElf.Types;
+using Awaken.Contracts.PoolTwo.ContractInitializationProviders;
 using Awaken.Contracts.PoolTwoContract;
 
 namespace Awaken.Contracts.PoolTwo
@@ -19,5 +22,14 @@ namespace Awaken.Contracts.PoolTwo
         {
             return GetTester<TokenContractContainer.TokenContractStub>(TokenContractAddress, pair);
         }
+        
+        internal Token.TokenContractContainer.TokenContractStub GetLpTokenContractStub(ECKeyPair pair)
+        {
+            return GetTester<Token.TokenContractContainer.TokenContractStub>(LpTokenContractAddress, pair);
+        }
+
+        // Address
+        internal Address LpTokenContractAddress => GetAddress(AwakenTokenContractAddressNameProvider.StringName);
+
     }
 }

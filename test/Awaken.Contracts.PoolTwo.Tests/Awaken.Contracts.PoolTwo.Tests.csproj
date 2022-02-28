@@ -32,6 +32,23 @@
     </ContractMessage>
   </ItemGroup>
   <ItemGroup>
+
+    <ContractStub Include="..\..\protobuf\acs1.proto">
+      <Link>Protobuf\Proto\reference\acs1.proto</Link>
+    </ContractStub>
+    <ContractStub Include="..\..\protobuf\acs2.proto">
+      <Link>Protobuf\Proto\reference\acs2.proto</Link>
+    </ContractStub>
+    <ContractStub Include="..\..\protobuf\transaction_fee.proto">
+      <Link>Protobuf\Proto\reference\transaction_fee.proto</Link>
+    </ContractStub>
+    <ContractStub Include="..\..\protobuf\authority_info.proto">
+      <Link>Protobuf\Proto\reference\authority_info.proto</Link>
+    </ContractStub>
+    <ContractStub Include="..\..\protobuf\awaken_token_contract.proto">
+      <Link>Protobuf\Proto\reference\awaken_token_contract.proto</Link>
+    </ContractStub>
+    
     <ContractStub Include="..\..\protobuf\pool_two_contract.proto">
       <Link>Protobuf\Proto\pool_two_contract.proto</Link>
     </ContractStub>
@@ -43,6 +60,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\contract\Awaken.Contracts.PoolTwo\Awaken.Contracts.PoolTwo.csproj" />
     <ProjectReference Include="..\..\src\AElf.Boilerplate.TestBase\AElf.Boilerplate.TestBase.csproj" />
+    <ProjectReference Include="..\..\contract\Awaken.Contracts.Token\Awaken.Contracts.Token.csproj" />
   </ItemGroup>
 
 </Project>

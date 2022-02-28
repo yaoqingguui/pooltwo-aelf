@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using AElf.Boilerplate.TestBase;
+using AElf.Contracts.MultiToken;
 using AElf.ContractTestBase;
 using AElf.Kernel.SmartContract.Application;
+using Awaken.Contracts.PoolTwo.ContractInitializationProviders;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
 using Volo.Abp.Modularity;
@@ -15,6 +17,7 @@ namespace Awaken.Contracts.PoolTwo
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             context.Services.AddSingleton<IContractInitializationProvider, PoolTwoContractInitializationProvider>();
+            context.Services.AddSingleton<IContractInitializationProvider, AwakenTokenInitializationProvider>();
         }
 
         public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
@@ -26,6 +29,10 @@ namespace Awaken.Contracts.PoolTwo
                 {
                     new PoolTwoContractInitializationProvider().ContractCodeName,
                     File.ReadAllBytes(contractDllLocation)
+                },
+                {
+                    new AwakenTokenInitializationProvider().ContractCodeName,
+                    File.ReadAllBytes(typeof(TokenContract).Assembly.Location)
                 }
             };
             contractCodeProvider.Codes = contractCodes;
